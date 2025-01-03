@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using HybridCacheExample.Services;
+using HybridCacheExample.Models;
 
 namespace HybridCacheExample.Controllers;
 
@@ -6,27 +8,29 @@ namespace HybridCacheExample.Controllers;
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
-    private static readonly string[] Summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-
+    private readonly IWeatherService _weatherService;
     private readonly ILogger<WeatherForecastController> _logger;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    public WeatherForecastController(
+        IWeatherService weatherService,
+        ILogger<WeatherForecastController> logger)
     {
+        _weatherService = weatherService;
         _logger = logger;
     }
 
-    [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    [HttpGet("{city}")]
+    public async Task<ActionResult<OpenWeatherResponse>> Get(string city)
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+        try
+        {
+            var weather = await _weatherService.GetCurrentWeatherAsync(city);
+            return Ok(weather);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting weather for city: {City}", city);
+            return StatusCode(500, "Error fetching weather data");
+        }
     }
 }
