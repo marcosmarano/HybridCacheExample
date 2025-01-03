@@ -1,23 +1,36 @@
+using HybridCacheExample.Services;
+#pragma warning disable EXTEXP0018
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
 builder.Services.AddOpenApi();
+
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<IWeatherService, OpenWeatherService>();
+
+// To use the in-memory cache, uncomment the following line
+// builder.Services.AddMemoryCache();
+
+// To use the distributed cache, uncomment the following line
+// builder.Services.AddStackExchangeRedisCache(options =>
+// {
+//     options.Configuration = "localhost:XXXX";
+//     options.InstanceName = "HybridCacheExample";
+// });
+
+builder.Services.AddHybridCache();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

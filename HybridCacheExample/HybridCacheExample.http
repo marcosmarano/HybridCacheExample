@@ -1,6 +1,6 @@
 @HybridCacheExample_HostAddress = http://localhost:5089
 
-GET {{HybridCacheExample_HostAddress}}/weatherforecast/
+GET {{HybridCacheExample_HostAddress}}/Weather/London
 Accept: application/json
 
 ###
